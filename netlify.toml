@@ -1,8 +1,9 @@
 # Configuração do Netlify para o Dashboard Público Vi.Ca
 
 [build]
-  # Não há processo de build, é HTML/CSS/JS puro
-  publish = "."
+  # Build para minificar e ofuscar código
+  command = "npm run build"
+  publish = "dist"
   
 [build.environment]
   # Variáveis de ambiente (se necessário no futuro)
