@@ -1,0 +1,28 @@
+{
+  "name": "vica-dashboard-publico",
+  "version": "1.0.0",
+  "description": "Dashboard público em tempo real para visualização de pets disponíveis para adoção no Vi.Ca",
+  "main": "index.html",
+  "scripts": {
+    "dev": "python -m http.server 8000",
+    "start": "python -m http.server 8000"
+  },
+  "keywords": [
+    "dashboard",
+    "pets",
+    "adocao",
+    "vica",
+    "supabase",
+    "realtime"
+  ],
+  "author": "Vi.Ca - Vilinha Catioro",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/seu-usuario/vica-dashboard"
+  },
+  "homepage": "https://vica-dashboard.netlify.app",
+  "dependencies": {},
+  "devDependencies": {}
+}
+

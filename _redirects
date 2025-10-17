@@ -1,0 +1,4 @@
+# Netlify Redirects
+# Fallback para SPA (Single Page Application)
+/*    /index.html   200
+

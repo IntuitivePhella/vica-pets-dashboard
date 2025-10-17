@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vi.Ca - Pets em Tempo Real</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="icons/favicon.ico">
+    <link rel="icon" type="image/png" sizes="72x72" href="icons/icon-72x72.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="icons/icon-96x96.png">
+    <link rel="icon" type="image/png" sizes="144x144" href="icons/icon-144x144.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512x512.png">
+    <link rel="apple-touch-icon" href="icons/logoViCa.png">
+    
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <div class="header-logo-container">
+                    <img src="icons/logoViCa.png" alt="Vi.Ca Logo" class="header-logo">
+                    <div class="header-text">
+                        <h1 class="header-title">Adotar muda vidas</h1>
+                        <p class="header-subtitle">Nossos pets buscando um lar em tempo real</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="kanban-board">
+                <!-- Coluna Disponível -->
+                <div class="kanban-column">
+                    <div class="column-header disponivel-header">
+                        <i class="fas fa-heart"></i>
+                        <h2>Disponíveis</h2>
+                        <span class="badge" id="disponivel-count">0</span>
+                    </div>
+                    <div class="cards-container" id="disponivel-cards"></div>
+                </div>
+
+                <!-- Coluna Em Processo Adotivo -->
+                <div class="kanban-column">
+                    <div class="column-header processo-header">
+                        <i class="fas fa-file-signature"></i>
+                        <h2>Sendo Adotado</h2>
+                        <span class="badge" id="processo-count">0</span>
+                    </div>
+                    <div class="cards-container" id="processo-cards"></div>
+                </div>
+
+                <!-- Coluna Adotado -->
+                <div class="kanban-column">
+                    <div class="column-header adotado-header">
+                        <i class="fas fa-home"></i>
+                        <h2>Adotados</h2>
+                        <span class="badge" id="adotado-count">0</span>
+                    </div>
+                    <div class="cards-container" id="adotado-cards"></div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>Vi.Ca | Todos os direitos reservados</p>
+            <p class="footer-note">Dashboard atualizado em tempo real</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
+

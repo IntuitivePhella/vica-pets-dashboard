@@ -1,0 +1,43 @@
+# Ignorar arquivos do sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Ignorar logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Ignorar diretórios de dependências (se houver no futuro)
+node_modules/
+.npm/
+.yarn/
+
+# Ignorar arquivos de IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Ignorar arquivos de build (se houver no futuro)
+dist/
+build/
+.cache/
+
+# Ignorar arquivos de ambiente local (se houver)
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Ignorar arquivos temporários
+*.tmp
+*.temp
+.temp/
+tmp/
+
+# Netlify
+.netlify/
+
