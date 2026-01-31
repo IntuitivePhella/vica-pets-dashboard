@@ -5,9 +5,17 @@ console.log('🔨 Iniciando build do dashboard...\n');
 
 // Função para minificar JavaScript
 function minifyJS(code) {
+    // Proteção: evitar que "https://", "http://", etc. sejam tratados como comentário de linha.
+    // O minificador abaixo remove tudo após "//" na linha; sem essa proteção, URLs são corrompidas.
+    const PROTOCOL_PLACEHOLDER = '__COLON_SLASH_SLASH__';
+    code = code.replace(/:\/\//g, PROTOCOL_PLACEHOLDER);
+
     // Remove comentários
     code = code.replace(/\/\*[\s\S]*?\*\//g, '');
     code = code.replace(/\/\/.*/g, '');
+
+    // Restaura separador de protocolo
+    code = code.replace(new RegExp(PROTOCOL_PLACEHOLDER, 'g'), '://');
     
     // Remove espaços em branco extras
     code = code.replace(/\s+/g, ' ');
