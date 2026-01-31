@@ -1,9 +1,10 @@
+(() => {
 // Configuração do Supabase
 const SUPABASE_URL = 'https://dwrtskjadoocdxojkrlu.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3cnRza2phZG9vY2R4b2prcmx1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM3MDY2OTMsImV4cCI6MjA0OTI4MjY5M30.Ug5Efjr2kSdQyDyJoSKemCsWxRv0i3Ovf6PDOR3YCKE';
 
 // Inicializar cliente Supabase com configurações adicionais
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     auth: {
         persistSession: false,
         autoRefreshToken: false,
@@ -188,7 +189,7 @@ function isToday(dateString) {
 async function loadPets() {
     try {
         // Buscar pets disponíveis e em processo (sem filtro de data)
-        const { data: petsDisponiveis, error: errorDisponiveis } = await supabase
+        const { data: petsDisponiveis, error: errorDisponiveis } = await supabaseClient
             .from('pets')
             .select(`
                 id,
@@ -217,7 +218,7 @@ async function loadPets() {
         const amanha = new Date(hoje);
         amanha.setDate(amanha.getDate() + 1);
         
-        const { data: petsAdotados, error: errorAdotados } = await supabase
+        const { data: petsAdotados, error: errorAdotados } = await supabaseClient
             .from('pets')
             .select(`
                 id,
@@ -276,7 +277,7 @@ function setupRealtimeSubscription() {
         realtimeChannel.unsubscribe();
     }
     
-    realtimeChannel = supabase
+    realtimeChannel = supabaseClient
         .channel('pets-public-changes')
         .on(
             'postgres_changes',
@@ -521,3 +522,4 @@ window.addEventListener('beforeunload', () => {
     }
 });
 
+})();
