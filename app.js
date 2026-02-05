@@ -300,11 +300,28 @@ function setupRealtimeSubscription() {
         });
 }
 
+// Função para atualizar data e hora atual
+function updateDateTime() {
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year = now.getFullYear();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    
+    const formatted = `${day}/${month}/${year} - ${hours}:${minutes}`;
+    document.getElementById('current-datetime').textContent = formatted;
+}
+
 // Inicializar aplicação
 async function init() {
     console.log('Inicializando aplicação...');
     await loadPets();
     setupRealtimeSubscription();
+    
+    // Atualizar data/hora atual e configurar atualização a cada minuto
+    updateDateTime();
+    setInterval(updateDateTime, 60 * 1000);
     
     // Atualizar a cada 5 minutos como fallback
     setInterval(loadPets, 5 * 60 * 1000);

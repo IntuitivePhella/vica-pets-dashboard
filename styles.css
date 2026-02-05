@@ -115,6 +115,13 @@ body {
     color: var(--text-secondary);
 }
 
+.header-datetime {
+    font-size: 14px;
+    opacity: 0.7;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
 /* Main Content */
 .main-content {
     flex: 1;
@@ -428,6 +435,10 @@ body {
     
     .header-subtitle {
         font-size: 13px;
+    }
+    
+    .header-datetime {
+        font-size: 12px;
     }
     
     .main-content {
