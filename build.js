@@ -1,7 +1,13 @@
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 console.log('🔨 Iniciando build do dashboard...\n');
+
+// Função para gerar hash curto do conteúdo (cache busting)
+function generateHash(content) {
+    return crypto.createHash('md5').update(content).digest('hex').substring(0, 8);
+}
 
 // Função para minificar JavaScript
 function minifyJS(code) {
@@ -81,9 +87,19 @@ try {
     fs.writeFileSync('dist/styles.css', minifiedCSS);
     console.log(`✅ styles.css: ${stylesCSS.length} bytes → ${minifiedCSS.length} bytes (${Math.round((1 - minifiedCSS.length/stylesCSS.length) * 100)}% redução)\n`);
 
-    // Minificar index.html
+    // Cache busting: gerar hashes baseados no conteúdo minificado
+    const jsHash = generateHash(minifiedJS);
+    const cssHash = generateHash(minifiedCSS);
+    console.log(`🔑 Cache busting hashes: app.js?v=${jsHash} | styles.css?v=${cssHash}\n`);
+
+    // Minificar index.html e injetar hashes de cache busting
     console.log('⚙️  Minificando index.html...');
-    const indexHTML = fs.readFileSync('index.html', 'utf8');
+    let indexHTML = fs.readFileSync('index.html', 'utf8');
+    
+    // Injetar query strings de cache busting nas referências de arquivos
+    indexHTML = indexHTML.replace('href="styles.css"', `href="styles.css?v=${cssHash}"`);
+    indexHTML = indexHTML.replace('src="app.js"', `src="app.js?v=${jsHash}"`);
+    
     const minifiedHTML = minifyHTML(indexHTML);
     fs.writeFileSync('dist/index.html', minifiedHTML);
     console.log(`✅ index.html: ${indexHTML.length} bytes → ${minifiedHTML.length} bytes (${Math.round((1 - minifiedHTML.length/indexHTML.length) * 100)}% redução)\n`);

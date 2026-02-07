@@ -1,9 +1,8 @@
 # Configuração do Netlify para o Dashboard Público Vi.Ca
 
 [build]
-  # Temporariamente sem build - código original
-  # command = "npm run build"
-  publish = "."
+  command = "npm run build"
+  publish = "dist"
   
 [build.environment]
   # Variáveis de ambiente (se necessário no futuro)
@@ -27,15 +26,15 @@
     Permissions-Policy = "geolocation=(), microphone=(), camera=()"
     
 [[headers]]
-  # Cache para arquivos estáticos
+  # Cache para arquivos estáticos (cache busting via query string garante atualização)
   for = "/*.css"
   [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+    Cache-Control = "public, max-age=31536000"
     
 [[headers]]
   for = "/*.js"
   [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+    Cache-Control = "public, max-age=31536000"
     
 [[headers]]
   # Não fazer cache do HTML para sempre ter versão mais recente

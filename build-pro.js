@@ -1,8 +1,14 @@
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const { execSync } = require('child_process');
 
 console.log('🔨 Iniciando build profissional do dashboard...\n');
+
+// Função para gerar hash curto do conteúdo (cache busting)
+function generateHash(content) {
+    return crypto.createHash('md5').update(content).digest('hex').substring(0, 8);
+}
 
 // Criar diretório dist se não existir
 const distDir = path.join(__dirname, 'dist');
@@ -35,10 +41,28 @@ try {
     const cssMinified = fs.statSync('dist/styles.css').size;
     console.log(`✅ styles.css: ${cssOriginal} bytes → ${cssMinified} bytes (${Math.round((1 - cssMinified/cssOriginal) * 100)}% redução)\n`);
 
-    // Minificar index.html
+    // Cache busting: gerar hashes baseados no conteúdo minificado
+    const jsContent = fs.readFileSync('dist/app.js', 'utf8');
+    const cssContent = fs.readFileSync('dist/styles.css', 'utf8');
+    const jsHash = generateHash(jsContent);
+    const cssHash = generateHash(cssContent);
+    console.log(`🔑 Cache busting hashes: app.js?v=${jsHash} | styles.css?v=${cssHash}\n`);
+
+    // Minificar index.html com cache busting
     console.log('⚙️  Minificando index.html...');
     const htmlOriginal = fs.statSync('index.html').size;
-    execSync('npx html-minifier-terser --input-dir . --output-dir dist --file-ext html --collapse-whitespace --remove-comments --minify-js true --minify-css true', { stdio: 'inherit' });
+    
+    // Primeiro, injetar hashes de cache busting no HTML
+    let htmlContent = fs.readFileSync('index.html', 'utf8');
+    htmlContent = htmlContent.replace('href="styles.css"', `href="styles.css?v=${cssHash}"`);
+    htmlContent = htmlContent.replace('src="app.js"', `src="app.js?v=${jsHash}"`);
+    
+    // Salvar HTML temporário com hashes para o minificador processar
+    const tempHtmlPath = path.join(distDir, 'index.html');
+    fs.writeFileSync(tempHtmlPath, htmlContent);
+    
+    // Minificar o HTML já com os hashes injetados
+    execSync(`npx html-minifier-terser --collapse-whitespace --remove-comments --minify-js true --minify-css true -o dist/index.html dist/index.html`, { stdio: 'inherit' });
     const htmlMinified = fs.statSync('dist/index.html').size;
     console.log(`✅ index.html: ${htmlOriginal} bytes → ${htmlMinified} bytes (${Math.round((1 - htmlMinified/htmlOriginal) * 100)}% redução)\n`);
 
