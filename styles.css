@@ -54,7 +54,7 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     background-color: var(--background);
     color: var(--text);
     line-height: 1.6;
@@ -72,8 +72,8 @@ body {
     background: var(--white);
     color: var(--primary);
     padding: var(--spacing-md) var(--spacing-sm);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .header-content {
@@ -141,10 +141,10 @@ body {
 
 .kanban-column {
     background-color: rgba(255, 255, 255, 0.5);
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-xl);
     padding: var(--spacing-md);
     min-height: 600px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
 
 /* Column Headers */
@@ -157,7 +157,9 @@ body {
     margin-bottom: var(--spacing-md);
     color: var(--white);
     font-weight: 600;
-    position: relative;
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
 .column-header i {
@@ -202,9 +204,9 @@ body {
 /* Pet Card */
 .pet-card {
     background-color: var(--card-background);
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-xl);
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     animation: slideIn 0.5s ease;
 }
@@ -222,14 +224,13 @@ body {
 
 .pet-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 .pet-image {
     width: 100%;
-    height: 200px;
-    object-fit: contain;
-    background-color: var(--background);
+    height: auto;
+    display: block;
     /* Proteção contra cópia */
     user-select: none;
     -webkit-user-select: none;
@@ -401,18 +402,18 @@ body {
     100% { transform: rotate(360deg); }
 }
 
-/* Responsive Design */
-@media (max-width: 1200px) {
-    .kanban-board {
-        grid-template-columns: repeat(2, 1fr);
-    }
+/* =============================================
+   Mobile Tabs Bar (hidden on desktop)
+   ============================================= */
+.mobile-tabs {
+    display: none;
 }
 
+/* =============================================
+   Responsive Design
+   ============================================= */
 @media (max-width: 768px) {
-    .kanban-board {
-        grid-template-columns: 1fr;
-    }
-    
+    /* --- Header mobile --- */
     .header-logo-container {
         flex-direction: column;
         gap: var(--spacing-sm);
@@ -442,7 +443,104 @@ body {
     }
     
     .main-content {
-        padding: var(--spacing-md);
+        padding: var(--spacing-sm);
+    }
+
+    /* =========================================
+       Mobile Tabs + Swipe (unified)
+       ========================================= */
+
+    /* Tabs bar always visible on mobile */
+    .mobile-tabs {
+        display: flex;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: var(--white);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        scrollbar-width: none;
+    }
+
+    .mobile-tabs::-webkit-scrollbar {
+        display: none;
+    }
+
+    .mobile-tab {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        padding: 6px 6px 5px;
+        border: none;
+        background: transparent;
+        color: var(--text-secondary);
+        font-family: 'Nunito', sans-serif;
+        font-size: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        position: relative;
+        transition: color 0.25s ease;
+        white-space: nowrap;
+    }
+
+    .mobile-tab i {
+        font-size: 13px;
+    }
+
+    .mobile-tab.active {
+        color: var(--primary);
+    }
+
+    .mobile-tab.active::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 20%;
+        right: 20%;
+        height: 2px;
+        background: var(--primary);
+        border-radius: 2px 2px 0 0;
+    }
+
+    .tab-badge {
+        background: var(--primary);
+        color: var(--white);
+        font-size: 9px;
+        font-weight: 700;
+        padding: 0px 5px;
+        border-radius: var(--radius-full);
+        min-width: 16px;
+        text-align: center;
+        line-height: 1.4;
+    }
+
+    /* Kanban board: horizontal scroll snap */
+    .kanban-board {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        gap: var(--spacing-xl);
+        margin: 0;
+        padding: 0 4%;
+        scrollbar-width: none;
+    }
+
+    .kanban-board::-webkit-scrollbar {
+        display: none;
+    }
+
+    .kanban-column {
+        flex: 0 0 99%;
+        width: 99%;
+        scroll-snap-align: center;
+        min-height: auto;
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-sm);
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
     }
 }
 

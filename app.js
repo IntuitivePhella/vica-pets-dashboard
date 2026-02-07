@@ -173,6 +173,9 @@ function renderPets() {
             adotadoContainer.appendChild(createPetCard(pet));
         });
     }
+    
+    // Atualizar badges das abas mobile
+    updateTabBadges();
 }
 
 // Função para verificar se uma data é hoje
@@ -313,6 +316,104 @@ function updateDateTime() {
     document.getElementById('current-datetime').textContent = formatted;
 }
 
+// =============================================
+// Mobile UX: Tabs + Swipe sincronizados
+// =============================================
+
+let isScrollingFromTab = false; // Flag para evitar loop tab->scroll->tab
+let currentActiveColumn = 0; // Indice da coluna ativa atual
+
+function isMobile() {
+    return window.innerWidth <= 768;
+}
+
+// Mapeamento coluna <-> indice
+const COLUMN_NAMES = ['disponivel', 'processo', 'adotado'];
+
+// --- Tabs: clique rola o board ---
+function setupMobileTabs() {
+    const tabsContainer = document.getElementById('mobile-tabs');
+    if (!tabsContainer) return;
+
+    tabsContainer.addEventListener('click', (e) => {
+        const tab = e.target.closest('.mobile-tab');
+        if (!tab) return;
+
+        const columnName = tab.dataset.column;
+        const index = COLUMN_NAMES.indexOf(columnName);
+        if (index === -1) return;
+
+        // Atualizar aba visual
+        setActiveTab(index);
+
+        // Rolar o board para a coluna correspondente
+        const board = document.getElementById('kanban-board');
+        if (!board) return;
+
+        isScrollingFromTab = true;
+        const columns = board.querySelectorAll('.kanban-column');
+        if (columns[index]) {
+            const col = columns[index];
+            const scrollTarget = col.offsetLeft - (board.offsetWidth - col.offsetWidth) / 2;
+            board.scrollTo({ left: scrollTarget, behavior: 'smooth' });
+        }
+
+        // Rolar a pagina para o topo ao trocar de coluna
+        if (index !== currentActiveColumn) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            currentActiveColumn = index;
+        }
+
+        // Liberar flag apos a animacao de scroll terminar
+        setTimeout(() => { isScrollingFromTab = false; }, 400);
+    });
+}
+
+// --- Scroll do board atualiza a aba ativa ---
+function setupBoardScrollSync() {
+    const board = document.getElementById('kanban-board');
+    if (!board) return;
+
+    board.addEventListener('scroll', () => {
+        if (isScrollingFromTab) return; // Ignorar scroll causado por clique na tab
+
+        const scrollLeft = board.scrollLeft;
+        const columnWidth = board.offsetWidth;
+        const activeIndex = Math.round(scrollLeft / columnWidth);
+
+        setActiveTab(activeIndex);
+
+        // Rolar a pagina para o topo ao trocar de coluna via swipe
+        if (activeIndex !== currentActiveColumn) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            currentActiveColumn = activeIndex;
+        }
+    }, { passive: true });
+}
+
+// --- Atualizar aba ativa visualmente ---
+function setActiveTab(index) {
+    const tabs = document.querySelectorAll('.mobile-tab');
+    tabs.forEach((tab, i) => {
+        tab.classList.toggle('active', i === index);
+    });
+}
+
+// --- Update Tab Badges ---
+function updateTabBadges() {
+    const disponivelCount = document.getElementById('disponivel-count');
+    const processoCount = document.getElementById('processo-count');
+    const adotadoCount = document.getElementById('adotado-count');
+
+    const tabDisponivel = document.getElementById('tab-disponivel-count');
+    const tabProcesso = document.getElementById('tab-processo-count');
+    const tabAdotado = document.getElementById('tab-adotado-count');
+
+    if (tabDisponivel && disponivelCount) tabDisponivel.textContent = disponivelCount.textContent;
+    if (tabProcesso && processoCount) tabProcesso.textContent = processoCount.textContent;
+    if (tabAdotado && adotadoCount) tabAdotado.textContent = adotadoCount.textContent;
+}
+
 // Inicializar aplicação
 async function init() {
     console.log('Inicializando aplicação...');
@@ -325,6 +426,10 @@ async function init() {
     
     // Atualizar a cada 5 minutos como fallback
     setInterval(loadPets, 5 * 60 * 1000);
+    
+    // Setup mobile UX (tabs + swipe sincronizados)
+    setupMobileTabs();
+    setupBoardScrollSync();
 }
 
 // Variáveis para controle do modal de imagem

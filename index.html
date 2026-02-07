@@ -14,6 +14,11 @@
     <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512x512.png">
     <link rel="apple-touch-icon" href="icons/logoViCa.png">
     
+    <!-- Google Fonts - Nunito (identidade visual Vi.Ca) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -33,10 +38,29 @@
             </div>
         </header>
 
+        <!-- Mobile: Barra de Abas + Navegação por Swipe (apenas visível no mobile) -->
+        <div class="mobile-tabs" id="mobile-tabs">
+            <button class="mobile-tab active" data-column="disponivel">
+                <i class="fas fa-heart"></i>
+                <span>Disponíveis</span>
+                <span class="tab-badge" id="tab-disponivel-count">0</span>
+            </button>
+            <button class="mobile-tab" data-column="processo">
+                <i class="fas fa-file-signature"></i>
+                <span>Sendo Adotado</span>
+                <span class="tab-badge" id="tab-processo-count">0</span>
+            </button>
+            <button class="mobile-tab" data-column="adotado">
+                <i class="fas fa-home"></i>
+                <span>Adotados</span>
+                <span class="tab-badge" id="tab-adotado-count">0</span>
+            </button>
+        </div>
+
         <main class="main-content">
-            <div class="kanban-board">
+            <div class="kanban-board" id="kanban-board">
                 <!-- Coluna Disponível -->
-                <div class="kanban-column">
+                <div class="kanban-column" data-column="disponivel">
                     <div class="column-header disponivel-header">
                         <i class="fas fa-heart"></i>
                         <h2>Disponíveis</h2>
@@ -46,7 +70,7 @@
                 </div>
 
                 <!-- Coluna Em Processo Adotivo -->
-                <div class="kanban-column">
+                <div class="kanban-column" data-column="processo">
                     <div class="column-header processo-header">
                         <i class="fas fa-file-signature"></i>
                         <h2>Sendo Adotado</h2>
@@ -56,7 +80,7 @@
                 </div>
 
                 <!-- Coluna Adotado -->
-                <div class="kanban-column">
+                <div class="kanban-column" data-column="adotado">
                     <div class="column-header adotado-header">
                         <i class="fas fa-home"></i>
                         <h2>Adotados</h2>
@@ -65,6 +89,7 @@
                     <div class="cards-container" id="adotado-cards"></div>
                 </div>
             </div>
+
         </main>
 
         <footer class="footer">
