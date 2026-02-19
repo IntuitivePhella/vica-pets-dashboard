@@ -1,4 +1,7 @@
 # Netlify Redirects
+# Proxy de imagens Supabase (precisa vir antes do fallback SPA)
+/supabase-img/*  https://dwrtskjadoocdxojkrlu.supabase.co/:splat  200!
+
 # Fallback para SPA (Single Page Application)
 /*    /index.html   200
 
