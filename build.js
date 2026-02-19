@@ -66,6 +66,40 @@ function minifyHTML(code) {
     return code.trim();
 }
 
+function escapeRegExp(value) {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function getSupabaseRedirectRule(netlifyToml) {
+    const blocks = netlifyToml.split('[[redirects]]').slice(1);
+    for (const block of blocks) {
+        const fromMatch = block.match(/from\s*=\s*"([^"]+)"/);
+        if (!fromMatch || fromMatch[1] !== '/supabase-img/*') continue;
+
+        const toMatch = block.match(/to\s*=\s*"([^"]+)"/);
+        const statusMatch = block.match(/status\s*=\s*(\d+)/);
+        const forceMatch = block.match(/force\s*=\s*(true|false)/);
+
+        if (!toMatch || !statusMatch) return null;
+
+        const forceSuffix = forceMatch && forceMatch[1] === 'true' ? '!' : '';
+        return `${fromMatch[1]}  ${toMatch[1]}  ${statusMatch[1]}${forceSuffix}`;
+    }
+
+    return null;
+}
+
+function upsertSupabaseRedirect(redirectsContent, supabaseRuleLine) {
+    if (!supabaseRuleLine) return redirectsContent;
+
+    const ruleRegex = new RegExp(`^\\s*${escapeRegExp('/supabase-img/*')}\\s+.*$`, 'm');
+    if (ruleRegex.test(redirectsContent)) {
+        return redirectsContent.replace(ruleRegex, supabaseRuleLine);
+    }
+
+    return `${supabaseRuleLine}\n\n${redirectsContent.trimStart()}`;
+}
+
 // Criar diretório dist se não existir
 const distDir = path.join(__dirname, 'dist');
 if (!fs.existsSync(distDir)) {
@@ -110,8 +144,12 @@ try {
     // Copiar netlify.toml
     fs.copyFileSync('netlify.toml', 'dist/netlify.toml');
     
-    // Copiar _redirects
-    fs.copyFileSync('_redirects', 'dist/_redirects');
+    // Copiar _redirects garantindo proxy de imagens do Supabase
+    const netlifyToml = fs.readFileSync('netlify.toml', 'utf8');
+    const supabaseRuleLine = getSupabaseRedirectRule(netlifyToml);
+    const redirectsContent = fs.readFileSync('_redirects', 'utf8');
+    const updatedRedirects = upsertSupabaseRedirect(redirectsContent, supabaseRuleLine);
+    fs.writeFileSync('dist/_redirects', updatedRedirects);
     
     // Copiar pasta icons
     const iconsDir = path.join(distDir, 'icons');
