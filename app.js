@@ -20,6 +20,72 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
 let pets = [];
 let realtimeChannel = null;
 
+const IMAGE_PLACEHOLDER_URL = 'https://via.placeholder.com/300x200?text=Sem+Foto';
+const IMAGE_TRANSFORM_WIDTH = 400;
+const IMAGE_TRANSFORM_HEIGHT = 500;
+const IMAGE_TRANSFORM_QUALITY = 75;
+// Proxy opcional para CDN intermediario (ativo em produção; desativado em localhost)
+const IMAGE_PROXY_BASE_URL = ['localhost', '127.0.0.1'].includes(window.location.hostname) ? '' : '/supabase-img';
+const TRACKED_STATUSES = new Set(['DISPONIVEL', 'EM_PROCESSO_ADOTIVO', 'ADOTADO']);
+
+function applyImageProxy(url) {
+    if (!IMAGE_PROXY_BASE_URL) return url;
+
+    try {
+        const parsed = new URL(url);
+        return `${IMAGE_PROXY_BASE_URL}${parsed.pathname}${parsed.search}`;
+    } catch (_error) {
+        return url;
+    }
+}
+
+function buildCardImageUrl(originalUrl) {
+    if (!originalUrl) return IMAGE_PLACEHOLDER_URL;
+
+    try {
+        const parsed = new URL(originalUrl);
+        const publicPath = '/storage/v1/object/public/';
+        const renderPath = '/storage/v1/render/image/public/';
+
+        if (parsed.pathname.includes(publicPath)) {
+            parsed.pathname = parsed.pathname.replace(publicPath, renderPath);
+            parsed.searchParams.set('width', String(IMAGE_TRANSFORM_WIDTH));
+            parsed.searchParams.set('height', String(IMAGE_TRANSFORM_HEIGHT));
+            parsed.searchParams.set('resize', 'cover');
+            parsed.searchParams.set('quality', String(IMAGE_TRANSFORM_QUALITY));
+        }
+
+        return applyImageProxy(parsed.toString());
+    } catch (_error) {
+        return applyImageProxy(originalUrl);
+    }
+}
+
+function getPetPhotos(pet) {
+    if (!Array.isArray(pet?.fotos)) return [];
+    return pet.fotos.filter((url) => typeof url === 'string' && url.trim() !== '');
+}
+
+function getPetRenderSignature(pet) {
+    const photos = getPetPhotos(pet);
+    const caracteristicas = Array.isArray(pet.caracteristicas_especiais)
+        ? pet.caracteristicas_especiais.join('|')
+        : '';
+
+    return [
+        pet.id,
+        pet.nome,
+        pet.especie,
+        pet.idade,
+        pet.status,
+        pet.porte,
+        pet.sexo,
+        pet.raca || '',
+        caracteristicas,
+        photos[0] || '',
+    ].join('::');
+}
+
 // Mapeamento de características especiais
 const CARACTERISTICAS_ESPECIAIS = {
     cegueira_total: 'Cegueira total',
@@ -54,10 +120,13 @@ function createPetCard(pet) {
     const card = document.createElement('div');
     card.className = 'pet-card';
     card.setAttribute('data-pet-id', pet.id);
+    card.dataset.renderSignature = getPetRenderSignature(pet);
     
-    const fotoUrl = pet.fotos && pet.fotos.length > 0 
-        ? pet.fotos[0] 
-        : 'https://via.placeholder.com/300x200?text=Sem+Foto';
+    const originalPhotos = getPetPhotos(pet);
+    const primaryPhotoOriginal = originalPhotos[0] || null;
+    const fotoUrl = primaryPhotoOriginal
+        ? buildCardImageUrl(primaryPhotoOriginal)
+        : IMAGE_PLACEHOLDER_URL;
     
     const especieIcon = pet.especie === 'CÃO' ? 'fa-dog' : 'fa-cat';
     const sexoIcon = pet.sexo === 'MACHO' ? 'fa-mars' : 'fa-venus';
@@ -81,7 +150,7 @@ function createPetCard(pet) {
     }
     
     card.innerHTML = `
-        <img src="${fotoUrl}" alt="${pet.nome}" class="pet-image" loading="lazy" data-photos='${JSON.stringify(pet.fotos || [])}' style="cursor: pointer;" draggable="false" oncontextmenu="return false;">
+        <img src="${fotoUrl}" alt="${pet.nome}" class="pet-image" loading="lazy" data-photos='${JSON.stringify(originalPhotos)}' style="cursor: pointer;" draggable="false" oncontextmenu="return false;">
         <div class="pet-content">
             <div class="pet-header">
                 <div class="pet-name-container">
@@ -126,54 +195,69 @@ function createPetCard(pet) {
     return card;
 }
 
+function renderPetsColumn(container, petsByColumn, emptyStateHTML) {
+    if (petsByColumn.length === 0) {
+        if (!container.querySelector('.empty-state') || container.children.length !== 1) {
+            container.innerHTML = emptyStateHTML;
+        }
+        return;
+    }
+
+    const existingCardsById = new Map();
+    container.querySelectorAll('.pet-card').forEach((card) => {
+        existingCardsById.set(card.getAttribute('data-pet-id'), card);
+    });
+
+    const fragment = document.createDocumentFragment();
+
+    petsByColumn.forEach((pet) => {
+        const petId = String(pet.id);
+        const existingCard = existingCardsById.get(petId);
+        const nextSignature = getPetRenderSignature(pet);
+
+        let cardNode = existingCard;
+        if (!cardNode || cardNode.dataset.renderSignature !== nextSignature) {
+            cardNode = createPetCard(pet);
+        }
+
+        fragment.appendChild(cardNode);
+    });
+
+    container.replaceChildren(fragment);
+}
+
 // Função para renderizar pets em suas respectivas colunas
 function renderPets() {
     const disponivelContainer = document.getElementById('disponivel-cards');
     const processoContainer = document.getElementById('processo-cards');
     const adotadoContainer = document.getElementById('adotado-cards');
-    
-    // Limpar containers
-    disponivelContainer.innerHTML = '';
-    processoContainer.innerHTML = '';
-    adotadoContainer.innerHTML = '';
-    
+
     // Filtrar pets por status
-    const disponiveis = pets.filter(p => p.status === 'DISPONIVEL');
-    const emProcesso = pets.filter(p => p.status === 'EM_PROCESSO_ADOTIVO');
-    const adotados = pets.filter(p => p.status === 'ADOTADO');
-    
+    const disponiveis = pets.filter((p) => p.status === 'DISPONIVEL');
+    const emProcesso = pets.filter((p) => p.status === 'EM_PROCESSO_ADOTIVO');
+    const adotados = pets.filter((p) => p.status === 'ADOTADO');
+
     // Atualizar badges de contagem
     document.getElementById('disponivel-count').textContent = disponiveis.length;
     document.getElementById('processo-count').textContent = emProcesso.length;
     document.getElementById('adotado-count').textContent = adotados.length;
-    
-    // Renderizar pets disponíveis
-    if (disponiveis.length === 0) {
-        disponivelContainer.innerHTML = '<div class="empty-state"><i class="fas fa-heart"></i><p>Nenhum pet disponível</p></div>';
-    } else {
-        disponiveis.forEach(pet => {
-            disponivelContainer.appendChild(createPetCard(pet));
-        });
-    }
-    
-    // Renderizar pets em processo
-    if (emProcesso.length === 0) {
-        processoContainer.innerHTML = '<div class="empty-state"><i class="fas fa-file-signature"></i><p>Nenhum pet em processo</p></div>';
-    } else {
-        emProcesso.forEach(pet => {
-            processoContainer.appendChild(createPetCard(pet));
-        });
-    }
-    
-    // Renderizar pets adotados (apenas do dia atual)
-    if (adotados.length === 0) {
-        adotadoContainer.innerHTML = '<div class="empty-state"><i class="fas fa-home"></i><p>Nenhum pet adotado hoje</p></div>';
-    } else {
-        adotados.forEach(pet => {
-            adotadoContainer.appendChild(createPetCard(pet));
-        });
-    }
-    
+
+    renderPetsColumn(
+        disponivelContainer,
+        disponiveis,
+        '<div class="empty-state"><i class="fas fa-heart"></i><p>Nenhum pet disponível</p></div>'
+    );
+    renderPetsColumn(
+        processoContainer,
+        emProcesso,
+        '<div class="empty-state"><i class="fas fa-file-signature"></i><p>Nenhum pet em processo</p></div>'
+    );
+    renderPetsColumn(
+        adotadoContainer,
+        adotados,
+        '<div class="empty-state"><i class="fas fa-home"></i><p>Nenhum pet adotado hoje</p></div>'
+    );
+
     // Atualizar badges das abas mobile
     updateTabBadges();
 }
@@ -274,6 +358,74 @@ function animateCardMove(petId, newStatus) {
     }
 }
 
+function isTrackedStatus(status) {
+    return TRACKED_STATUSES.has(status);
+}
+
+function upsertPetInState(pet) {
+    if (!pet?.id) return false;
+
+    const index = pets.findIndex((item) => item.id === pet.id);
+    if (index === -1) {
+        pets.push(pet);
+        return true;
+    }
+
+    pets[index] = pet;
+    return true;
+}
+
+function removePetFromState(petId) {
+    if (!petId) return false;
+    const originalLength = pets.length;
+    pets = pets.filter((item) => item.id !== petId);
+    return pets.length !== originalLength;
+}
+
+function shouldReloadFromDatabase(payload) {
+    const newStatus = payload?.new?.status;
+    const oldStatus = payload?.old?.status;
+
+    // A coluna de adotados depende de join com adocoes e filtro por data;
+    // para manter consistencia, recarregamos apenas quando ADOTADO for afetado.
+    return newStatus === 'ADOTADO' || oldStatus === 'ADOTADO';
+}
+
+function applyRealtimePayload(payload) {
+    if (!payload?.eventType) {
+        loadPets();
+        return;
+    }
+
+    if (shouldReloadFromDatabase(payload)) {
+        loadPets();
+        return;
+    }
+
+    let hasChanges = false;
+
+    if (payload.eventType === 'INSERT') {
+        if (isTrackedStatus(payload.new?.status)) {
+            hasChanges = upsertPetInState(payload.new);
+        }
+    } else if (payload.eventType === 'UPDATE') {
+        if (isTrackedStatus(payload.new?.status)) {
+            hasChanges = upsertPetInState(payload.new);
+        } else {
+            hasChanges = removePetFromState(payload.old?.id || payload.new?.id);
+        }
+    } else if (payload.eventType === 'DELETE') {
+        hasChanges = removePetFromState(payload.old?.id);
+    } else {
+        loadPets();
+        return;
+    }
+
+    if (hasChanges) {
+        renderPets();
+    }
+}
+
 // Configurar Realtime para atualizações em tempo real
 function setupRealtimeSubscription() {
     if (realtimeChannel) {
@@ -292,10 +444,7 @@ function setupRealtimeSubscription() {
             },
             (payload) => {
                 console.log('Mudança detectada:', payload);
-                
-                // Quando houver mudança, recarregar tudo para garantir que apenas
-                // pets adotados hoje aparecem
-                loadPets();
+                applyRealtimePayload(payload);
             }
         )
         .subscribe((status) => {
@@ -423,9 +572,6 @@ async function init() {
     // Atualizar data/hora atual e configurar atualização a cada minuto
     updateDateTime();
     setInterval(updateDateTime, 60 * 1000);
-    
-    // Atualizar a cada 5 minutos como fallback
-    setInterval(loadPets, 5 * 60 * 1000);
     
     // Setup mobile UX (tabs + swipe sincronizados)
     setupMobileTabs();
