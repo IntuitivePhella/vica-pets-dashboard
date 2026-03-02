@@ -122,8 +122,8 @@ function createPetCard(pet) {
     card.setAttribute('data-pet-id', pet.id);
     card.dataset.renderSignature = getPetRenderSignature(pet);
     
-    const originalPhotos = getPetPhotos(pet);
-    const primaryPhotoOriginal = originalPhotos[0] || null;
+    const photos = getPetPhotos(pet);
+    const primaryPhotoOriginal = photos[0] || null;
     const fotoUrl = primaryPhotoOriginal
         ? buildCardImageUrl(primaryPhotoOriginal)
         : IMAGE_PLACEHOLDER_URL;
@@ -150,7 +150,7 @@ function createPetCard(pet) {
     }
     
     card.innerHTML = `
-        <img src="${fotoUrl}" alt="${pet.nome}" class="pet-image" loading="lazy" data-photos='${JSON.stringify(originalPhotos)}' style="cursor: pointer;" draggable="false" oncontextmenu="return false;">
+        <img src="${fotoUrl}" alt="${pet.nome}" class="pet-image" loading="lazy">
         <div class="pet-content">
             <div class="pet-header">
                 <div class="pet-name-container">
@@ -181,16 +181,6 @@ function createPetCard(pet) {
             ${caracteristicasHTML}
         </div>
     `;
-    
-    // Adicionar event listener para abrir modal ao clicar na imagem
-    const petImage = card.querySelector('.pet-image');
-    if (petImage) {
-        petImage.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const photos = JSON.parse(petImage.dataset.photos || '[]');
-            openImageModal(photos, 0);
-        });
-    }
     
     return card;
 }
@@ -578,209 +568,9 @@ async function init() {
     setupBoardScrollSync();
 }
 
-// Variáveis para controle do modal de imagem
-let currentImageIndex = 0;
-let currentPhotos = [];
-let currentScale = 1;
-
-// Função para abrir o modal de imagem
-function openImageModal(photos, index) {
-    currentPhotos = photos.filter(url => url && url.trim() !== '');
-    if (currentPhotos.length === 0) return;
-    
-    currentImageIndex = index;
-    currentScale = 1;
-    
-    // Criar modal se não existir
-    let modal = document.getElementById('image-modal');
-    if (!modal) {
-        modal = document.createElement('div');
-        modal.id = 'image-modal';
-        modal.className = 'image-modal';
-        modal.innerHTML = `
-            <div class="modal-backdrop"></div>
-            <div class="modal-content-zoom">
-                <button class="modal-close" onclick="closeImageModal()">
-                    <i class="fas fa-times"></i>
-                </button>
-                <div class="modal-image-container">
-                    <img id="modal-image" src="" alt="Pet" class="modal-image" draggable="false" oncontextmenu="return false;">
-                </div>
-                ${currentPhotos.length > 1 ? `
-                    <button class="modal-nav modal-prev" onclick="prevImage()">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                    <button class="modal-nav modal-next" onclick="nextImage()">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                    <div class="modal-pagination" id="modal-pagination"></div>
-                ` : ''}
-                <div class="modal-zoom-hint">
-                    <i class="fas fa-search-plus"></i> Use a roda do mouse para dar zoom
-                </div>
-            </div>
-        `;
-        document.body.appendChild(modal);
-        
-        // Event listener para fechar ao clicar no backdrop
-        modal.querySelector('.modal-backdrop').addEventListener('click', closeImageModal);
-        
-        // Event listener para zoom com scroll do mouse
-        const modalImage = modal.querySelector('#modal-image');
-        modal.querySelector('.modal-content-zoom').addEventListener('wheel', (e) => {
-            e.preventDefault();
-            const delta = e.deltaY * -0.001;
-            currentScale = Math.min(Math.max(1, currentScale + delta), 4);
-            modalImage.style.transform = `scale(${currentScale})`;
-        });
-        
-        // Teclas do teclado
-        document.addEventListener('keydown', handleKeyPress);
-    }
-    
-    updateModalImage();
-    modal.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-}
-
-// Função para fechar o modal
-function closeImageModal() {
-    const modal = document.getElementById('image-modal');
-    if (modal) {
-        modal.style.display = 'none';
-        document.body.style.overflow = '';
-        currentScale = 1;
-    }
-}
-
-// Função para atualizar a imagem do modal
-function updateModalImage() {
-    const modal = document.getElementById('image-modal');
-    if (!modal) return;
-    
-    const modalImage = modal.querySelector('#modal-image');
-    modalImage.src = currentPhotos[currentImageIndex];
-    modalImage.style.transform = `scale(${currentScale})`;
-    
-    // Atualizar paginação
-    if (currentPhotos.length > 1) {
-        const pagination = modal.querySelector('#modal-pagination');
-        if (pagination) {
-            pagination.innerHTML = currentPhotos.map((_, index) => 
-                `<span class="pagination-dot ${index === currentImageIndex ? 'active' : ''}"></span>`
-            ).join('');
-        }
-        
-        // Atualizar visibilidade dos botões de navegação
-        const prevBtn = modal.querySelector('.modal-prev');
-        const nextBtn = modal.querySelector('.modal-next');
-        if (prevBtn) prevBtn.style.display = currentImageIndex > 0 ? 'flex' : 'none';
-        if (nextBtn) nextBtn.style.display = currentImageIndex < currentPhotos.length - 1 ? 'flex' : 'none';
-    }
-}
-
-// Função para ir para a imagem anterior
-function prevImage() {
-    if (currentImageIndex > 0) {
-        currentImageIndex--;
-        currentScale = 1;
-        updateModalImage();
-    }
-}
-
-// Função para ir para a próxima imagem
-function nextImage() {
-    if (currentImageIndex < currentPhotos.length - 1) {
-        currentImageIndex++;
-        currentScale = 1;
-        updateModalImage();
-    }
-}
-
-// Função para lidar com teclas do teclado
-function handleKeyPress(e) {
-    const modal = document.getElementById('image-modal');
-    if (!modal || modal.style.display !== 'flex') return;
-    
-    switch(e.key) {
-        case 'Escape':
-            closeImageModal();
-            break;
-        case 'ArrowLeft':
-            prevImage();
-            break;
-        case 'ArrowRight':
-            nextImage();
-            break;
-    }
-}
-
-// Proteção contra cópia e salvamento de imagens
-function setupImageProtection() {
-    // Desabilitar menu de contexto (botão direito) em todas as imagens
-    document.addEventListener('contextmenu', (e) => {
-        if (e.target.tagName === 'IMG') {
-            e.preventDefault();
-            return false;
-        }
-    });
-    
-    // Desabilitar arrastar imagens
-    document.addEventListener('dragstart', (e) => {
-        if (e.target.tagName === 'IMG') {
-            e.preventDefault();
-            return false;
-        }
-    });
-    
-    // Desabilitar atalhos de teclado para salvar
-    document.addEventListener('keydown', (e) => {
-        // Ctrl+S ou Cmd+S (salvar)
-        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-            e.preventDefault();
-            return false;
-        }
-        // Ctrl+Shift+S ou Cmd+Shift+S (salvar como)
-        if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'S') {
-            e.preventDefault();
-            return false;
-        }
-        // Print Screen (captura de tela) - não pode ser totalmente bloqueado
-        // mas podemos mostrar um aviso
-        if (e.key === 'PrintScreen') {
-            console.log('Captura de tela detectada');
-        }
-    });
-    
-    // Desabilitar seleção e cópia em imagens
-    document.addEventListener('selectstart', (e) => {
-        if (e.target.tagName === 'IMG') {
-            e.preventDefault();
-            return false;
-        }
-    });
-    
-    // Desabilitar copiar imagens
-    document.addEventListener('copy', (e) => {
-        const selection = window.getSelection();
-        if (selection && selection.toString().length === 0) {
-            // Se nada estiver selecionado, pode ser tentativa de copiar imagem
-            e.preventDefault();
-            return false;
-        }
-    });
-}
-
-// Expor funções do modal para o escopo global
-window.openImageModal = openImageModal;
-window.closeImageModal = closeImageModal;
-window.prevImage = prevImage;
-window.nextImage = nextImage;
-
 // Iniciar quando a página carregar
 window.addEventListener('DOMContentLoaded', () => {
     init();
-    setupImageProtection();
 });
 
 // Limpar subscription quando sair da página

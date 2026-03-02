@@ -143,6 +143,9 @@ try {
     
     // Copiar netlify.toml
     fs.copyFileSync('netlify.toml', 'dist/netlify.toml');
+
+    // Copiar service worker
+    fs.copyFileSync('sw.js', 'dist/sw.js');
     
     // Copiar _redirects garantindo proxy de imagens do Supabase
     const netlifyToml = fs.readFileSync('netlify.toml', 'utf8');

@@ -44,8 +44,19 @@
     Cache-Control = "public, max-age=31536000"
     
 [[headers]]
+  for = "/icons/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    
+[[headers]]
   # Não fazer cache do HTML para sempre ter versão mais recente
   for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  # Service worker sempre atualizado
+  for = "/sw.js"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
 

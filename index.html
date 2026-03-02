@@ -12,9 +12,6 @@
     
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="icons/favicon.ico">
-    <link rel="icon" type="image/png" sizes="72x72" href="icons/icon-72x72.png">
-    <link rel="icon" type="image/png" sizes="96x96" href="icons/icon-96x96.png">
-    <link rel="icon" type="image/png" sizes="144x144" href="icons/icon-144x144.png">
     <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512x512.png">
     <link rel="apple-touch-icon" href="icons/logoViCa.png">
@@ -104,6 +101,15 @@
     </div>
 
     <script src="app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').catch((error) => {
+                    console.error('Erro ao registrar service worker:', error);
+                });
+            });
+        }
+    </script>
 </body>
 </html>
 
