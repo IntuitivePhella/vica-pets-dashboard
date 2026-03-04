@@ -21,9 +21,6 @@ let pets = [];
 let realtimeChannel = null;
 
 const IMAGE_PLACEHOLDER_URL = 'https://via.placeholder.com/300x200?text=Sem+Foto';
-const IMAGE_TRANSFORM_WIDTH = 400;
-const IMAGE_TRANSFORM_HEIGHT = 500;
-const IMAGE_TRANSFORM_QUALITY = 75;
 // Proxy opcional para CDN intermediario (ativo em produção; desativado em localhost)
 const IMAGE_PROXY_BASE_URL = ['localhost', '127.0.0.1'].includes(window.location.hostname) ? '' : '/supabase-img';
 const TRACKED_STATUSES = new Set(['DISPONIVEL', 'EM_PROCESSO_ADOTIVO', 'ADOTADO']);
@@ -41,24 +38,7 @@ function applyImageProxy(url) {
 
 function buildCardImageUrl(originalUrl) {
     if (!originalUrl) return IMAGE_PLACEHOLDER_URL;
-
-    try {
-        const parsed = new URL(originalUrl);
-        const publicPath = '/storage/v1/object/public/';
-        const renderPath = '/storage/v1/render/image/public/';
-
-        if (parsed.pathname.includes(publicPath)) {
-            parsed.pathname = parsed.pathname.replace(publicPath, renderPath);
-            parsed.searchParams.set('width', String(IMAGE_TRANSFORM_WIDTH));
-            parsed.searchParams.set('height', String(IMAGE_TRANSFORM_HEIGHT));
-            parsed.searchParams.set('resize', 'cover');
-            parsed.searchParams.set('quality', String(IMAGE_TRANSFORM_QUALITY));
-        }
-
-        return applyImageProxy(parsed.toString());
-    } catch (_error) {
-        return applyImageProxy(originalUrl);
-    }
+    return applyImageProxy(originalUrl);
 }
 
 function getPetPhotos(pet) {
