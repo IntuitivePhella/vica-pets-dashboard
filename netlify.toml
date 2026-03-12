@@ -8,12 +8,7 @@
   # Variáveis de ambiente (se necessário no futuro)
   NODE_VERSION = "18"
 
-[[redirects]]
-  # Proxy de imagens Supabase para aproveitar cache da CDN da Netlify
-  from = "/supabase-img/*"
-  to = "https://dwrtskjadoocdxojkrlu.supabase.co/:splat"
-  status = 200
-  force = true
+
 
 [[redirects]]
   # Redirecionar todas as rotas para index.html (SPA behavior)
@@ -60,9 +55,5 @@
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
 
-[[headers]]
-  # Cache agressivo para imagens proxied do Supabase
-  for = "/supabase-img/*"
-  [headers.values]
-    Cache-Control = "public, max-age=2592000, stale-while-revalidate=86400"
+
 

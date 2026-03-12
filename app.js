@@ -21,8 +21,8 @@ let pets = [];
 let realtimeChannel = null;
 
 const IMAGE_PLACEHOLDER_URL = 'https://via.placeholder.com/300x200?text=Sem+Foto';
-// Proxy opcional para CDN intermediario (ativo em produção; desativado em localhost)
-const IMAGE_PROXY_BASE_URL = ['localhost', '127.0.0.1'].includes(window.location.hostname) ? '' : '/supabase-img';
+// Proxy opcional para CDN intermediario desativado para uso direto da CDN nativa do Supabase
+const IMAGE_PROXY_BASE_URL = '';
 const TRACKED_STATUSES = new Set(['DISPONIVEL', 'EM_PROCESSO_ADOTIVO', 'ADOTADO']);
 
 function applyImageProxy(url) {
@@ -38,7 +38,21 @@ function applyImageProxy(url) {
 
 function buildCardImageUrl(originalUrl) {
     if (!originalUrl) return IMAGE_PLACEHOLDER_URL;
-    return applyImageProxy(originalUrl);
+    let url = applyImageProxy(originalUrl);
+    
+    try {
+        if (url.includes('supabase.co')) {
+            const parsed = new URL(url);
+            parsed.searchParams.set('width', '400');
+            parsed.searchParams.set('quality', '80');
+            parsed.searchParams.set('resize', 'contain');
+            url = parsed.toString();
+        }
+    } catch (_err) {
+        // Ignora erros de URL inválida
+    }
+    
+    return url;
 }
 
 function getPetPhotos(pet) {

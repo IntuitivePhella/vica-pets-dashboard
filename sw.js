@@ -1,6 +1,6 @@
 const IMAGE_CACHE_NAME = "vica-images-v1";
 const STATIC_CACHE_NAME = "vica-static-v1";
-const MAX_IMAGE_CACHE_ITEMS = 100;
+const MAX_IMAGE_CACHE_ITEMS = 400;
 
 self.addEventListener("install", () => {
   self.skipWaiting();
