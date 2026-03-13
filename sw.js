@@ -1,5 +1,5 @@
-const IMAGE_CACHE_NAME = "vica-images-v1";
-const STATIC_CACHE_NAME = "vica-static-v1";
+const IMAGE_CACHE_NAME = "vica-images-v2";
+const STATIC_CACHE_NAME = "vica-static-v2";
 const MAX_IMAGE_CACHE_ITEMS = 400;
 
 self.addEventListener("install", () => {
@@ -26,8 +26,9 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(request.url);
   const isSameOrigin = url.origin === self.location.origin;
+  const isSupabaseStorage = url.origin.includes("supabase.co") && url.pathname.includes("/storage/v1/object/public/");
 
-  if (isSameOrigin && url.pathname.startsWith("/supabase-img/")) {
+  if ((isSameOrigin && url.pathname.startsWith("/supabase-img/")) || isSupabaseStorage) {
     event.respondWith(cacheFirst(request, IMAGE_CACHE_NAME, MAX_IMAGE_CACHE_ITEMS));
     return;
   }

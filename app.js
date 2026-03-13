@@ -144,7 +144,7 @@ function createPetCard(pet) {
     }
     
     card.innerHTML = `
-        <img src="${fotoUrl}" alt="${pet.nome}" class="pet-image" loading="lazy">
+        <img src="${fotoUrl}" alt="${pet.nome}" class="pet-image" loading="lazy" crossorigin="anonymous">
         <div class="pet-content">
             <div class="pet-header">
                 <div class="pet-name-container">
