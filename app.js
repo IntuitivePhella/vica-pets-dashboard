@@ -24,6 +24,7 @@ const IMAGE_PLACEHOLDER_URL = 'https://via.placeholder.com/300x200?text=Sem+Foto
 // Proxy opcional para CDN intermediario desativado para uso direto da CDN nativa do Supabase
 const IMAGE_PROXY_BASE_URL = '';
 const TRACKED_STATUSES = new Set(['DISPONIVEL', 'EM_PROCESSO_ADOTIVO', 'ADOTADO']);
+const TRANSFORM_QUERY_PARAMS = ['width', 'height', 'quality', 'resize', 'format', 'se'];
 
 function applyImageProxy(url) {
     if (!IMAGE_PROXY_BASE_URL) return url;
@@ -36,28 +37,42 @@ function applyImageProxy(url) {
     }
 }
 
+function isSupabaseStorageUrl(url) {
+    try {
+        const parsed = new URL(url);
+        return parsed.hostname.endsWith('supabase.co') &&
+            parsed.pathname.includes('/storage/v1/object/public/');
+    } catch (_error) {
+        return false;
+    }
+}
+
+function stripTransformQueryParams(url) {
+    try {
+        const parsed = new URL(url);
+        TRANSFORM_QUERY_PARAMS.forEach((param) => parsed.searchParams.delete(param));
+        return parsed.toString();
+    } catch (_error) {
+        return url;
+    }
+}
+
 function buildCardImageUrl(originalUrl) {
     if (!originalUrl) return IMAGE_PLACEHOLDER_URL;
     let url = applyImageProxy(originalUrl);
-    
-    try {
-        if (url.includes('supabase.co')) {
-            const parsed = new URL(url);
-            parsed.searchParams.set('width', '400');
-            parsed.searchParams.set('quality', '80');
-            parsed.searchParams.set('resize', 'contain');
-            url = parsed.toString();
-        }
-    } catch (_err) {
-        // Ignora erros de URL inválida
+
+    if (isSupabaseStorageUrl(url)) {
+        url = stripTransformQueryParams(url);
     }
-    
+
     return url;
 }
 
 function getPetPhotos(pet) {
     if (!Array.isArray(pet?.fotos)) return [];
-    return pet.fotos.filter((url) => typeof url === 'string' && url.trim() !== '');
+    return pet.fotos
+        .filter((url) => typeof url === 'string' && url.trim() !== '')
+        .map((url) => (isSupabaseStorageUrl(url) ? stripTransformQueryParams(url) : url));
 }
 
 function getPetRenderSignature(pet) {

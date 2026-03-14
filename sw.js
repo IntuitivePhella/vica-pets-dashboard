@@ -1,6 +1,7 @@
 const IMAGE_CACHE_NAME = "vica-images-v2";
 const STATIC_CACHE_NAME = "vica-static-v2";
 const MAX_IMAGE_CACHE_ITEMS = 400;
+const TRANSFORM_QUERY_PARAMS = ["width", "height", "quality", "resize", "format", "se"];
 
 self.addEventListener("install", () => {
   self.skipWaiting();
@@ -29,7 +30,12 @@ self.addEventListener("fetch", (event) => {
   const isSupabaseStorage = url.origin.includes("supabase.co") && url.pathname.includes("/storage/v1/object/public/");
 
   if ((isSameOrigin && url.pathname.startsWith("/supabase-img/")) || isSupabaseStorage) {
-    event.respondWith(cacheFirst(request, IMAGE_CACHE_NAME, MAX_IMAGE_CACHE_ITEMS));
+    const cacheKeyRequest = isSupabaseStorage
+      ? buildCanonicalImageCacheKeyRequest(request)
+      : request;
+    event.respondWith(
+      cacheFirst(request, IMAGE_CACHE_NAME, MAX_IMAGE_CACHE_ITEMS, cacheKeyRequest)
+    );
     return;
   }
 
@@ -46,8 +52,14 @@ self.addEventListener("fetch", (event) => {
   }
 });
 
-async function cacheFirst(request, cacheName, maxItems) {
-  const cached = await caches.match(request);
+function buildCanonicalImageCacheKeyRequest(request) {
+  const canonicalUrl = new URL(request.url);
+  TRANSFORM_QUERY_PARAMS.forEach((param) => canonicalUrl.searchParams.delete(param));
+  return new Request(canonicalUrl.toString(), { method: "GET" });
+}
+
+async function cacheFirst(request, cacheName, maxItems, cacheKeyRequest = request) {
+  const cached = await caches.match(cacheKeyRequest);
   if (cached) return cached;
 
   try {
@@ -55,7 +67,7 @@ async function cacheFirst(request, cacheName, maxItems) {
     if (!response || response.status !== 200) return response;
 
     const cache = await caches.open(cacheName);
-    await cache.put(request, response.clone());
+    await cache.put(cacheKeyRequest, response.clone());
 
     if (maxItems) {
       await trimCache(cacheName, maxItems);
