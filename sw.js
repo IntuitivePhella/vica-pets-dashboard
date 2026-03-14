@@ -28,8 +28,10 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
   const isSameOrigin = url.origin === self.location.origin;
   const isSupabaseStorage = url.origin.includes("supabase.co") && url.pathname.includes("/storage/v1/object/public/");
+  // Tratar requisições para o CDN de Imagens do Netlify
+  const isNetlifyImageProxy = isSameOrigin && url.pathname.startsWith("/.netlify/images");
 
-  if ((isSameOrigin && url.pathname.startsWith("/supabase-img/")) || isSupabaseStorage) {
+  if (isNetlifyImageProxy || isSupabaseStorage) {
     const cacheKeyRequest = isSupabaseStorage
       ? buildCanonicalImageCacheKeyRequest(request)
       : request;

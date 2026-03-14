@@ -21,8 +21,8 @@ let pets = [];
 let realtimeChannel = null;
 
 const IMAGE_PLACEHOLDER_URL = 'https://via.placeholder.com/300x200?text=Sem+Foto';
-// Proxy opcional para CDN intermediario desativado para uso direto da CDN nativa do Supabase
-const IMAGE_PROXY_BASE_URL = '';
+// Habilitando Netlify Image CDN como Proxy Proxy para mitigar Egress e Limits do Supabase.
+const IMAGE_PROXY_BASE_URL = '/.netlify/images';
 const TRACKED_STATUSES = new Set(['DISPONIVEL', 'EM_PROCESSO_ADOTIVO', 'ADOTADO']);
 const TRANSFORM_QUERY_PARAMS = ['width', 'height', 'quality', 'resize', 'format', 'se'];
 
@@ -31,7 +31,8 @@ function applyImageProxy(url) {
 
     try {
         const parsed = new URL(url);
-        return `${IMAGE_PROXY_BASE_URL}${parsed.pathname}${parsed.search}`;
+        // O Netlify Image CDN requer o URL como query param, ex: /.netlify/images?url=https...&w=400&q=80
+        return `${IMAGE_PROXY_BASE_URL}?url=${encodeURIComponent(url)}&w=400&q=80`;
     } catch (_error) {
         return url;
     }
@@ -59,13 +60,16 @@ function stripTransformQueryParams(url) {
 
 function buildCardImageUrl(originalUrl) {
     if (!originalUrl) return IMAGE_PLACEHOLDER_URL;
-    let url = applyImageProxy(originalUrl);
 
-    if (isSupabaseStorageUrl(url)) {
-        url = stripTransformQueryParams(url);
+    // Se for URL do Supabase, sempre limpamos a sujeira querystring original
+    // antes de enviá-la ao proxy do Netlify para obter a Imagem base Master e cachear do lado deles.
+    let cleanUrl = originalUrl;
+    if (isSupabaseStorageUrl(cleanUrl)) {
+        cleanUrl = stripTransformQueryParams(cleanUrl);
     }
-
-    return url;
+    
+    // Agora encapsula na CDN do Netlify
+    return applyImageProxy(cleanUrl);
 }
 
 function getPetPhotos(pet) {

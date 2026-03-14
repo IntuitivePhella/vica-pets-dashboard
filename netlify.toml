@@ -55,5 +55,5 @@
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
 
-
-
+[images]
+  remote_images = ["https://dwrtskjadoocdxojkrlu.supabase.co/.*"]
