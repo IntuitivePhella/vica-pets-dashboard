@@ -13,6 +13,7 @@ yarn-error.log*
 node_modules/
 .npm/
 .yarn/
+.docs
 
 # Ignorar arquivos de IDE
 .vscode/
@@ -41,3 +42,7 @@ tmp/
 # Netlify
 .netlify/
 .specstory
+
+# AI Agents and Tools
+.agent/
+.cursor/
