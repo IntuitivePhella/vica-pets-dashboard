@@ -277,36 +277,33 @@ body {
     margin-top: var(--spacing-sm);
 }
 
-.info-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px 8px;
     padding: 4px 0;
 }
 
-.info-group {
+.info-block {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 5px;
+    text-align: center;
 }
 
-.info-icon {
+.info-label {
+    font-size: 11px;
     color: var(--primary);
-    font-size: 14px;
-    width: 14px;
-    text-align: center;
+    margin-bottom: 2px;
+    font-weight: bold;
+    line-height: 1.2;
 }
 
 .pet-info {
     font-size: 13px;
     color: var(--text);
     font-weight: 500;
-}
-
-.separator {
-    color: rgba(84, 113, 147, 0.4);
-    font-weight: 200;
-    font-size: 16px;
+    line-height: 1.2;
 }
 
 /* Características Especiais */

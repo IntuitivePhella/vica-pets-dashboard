@@ -173,33 +173,22 @@ function createPetCard(pet) {
             </div>
             
             <div class="pet-info-container">
-                <div class="info-row">
-                    <div style="display: flex; flex-direction: column; align-items: center;">
-                        <span style="font-size: 11px; color: var(--primary); margin-bottom: 2px; font-weight: bold;">Características de</span>
-                        <div class="info-group">
-                            <span class="pet-info">${raca}</span>
-                        </div>
+                <div class="info-grid">
+                    <div class="info-block">
+                        <span class="info-label">Características de</span>
+                        <span class="pet-info">${raca}</span>
                     </div>
-                    <span class="separator">|</span>
-                    <div style="display: flex; flex-direction: column; align-items: center;">
-                        <span style="font-size: 11px; color: var(--primary); margin-bottom: 2px; font-weight: bold;">Sexo</span>
-                        <div class="info-group">
-                            <span class="pet-info">${pet.sexo === 'MACHO' ? 'Macho' : 'Fêmea'}</span>
-                        </div>
+                    <div class="info-block">
+                        <span class="info-label">Sexo</span>
+                        <span class="pet-info">${pet.sexo === 'MACHO' ? 'Macho' : 'Fêmea'}</span>
                     </div>
-                    <span class="separator">|</span>
-                    <div style="display: flex; flex-direction: column; align-items: center;">
-                        <span style="font-size: 11px; color: var(--primary); margin-bottom: 2px; font-weight: bold;">Idade estimada</span>
-                        <div class="info-group">
-                            <span class="pet-info">${pet.idade}</span>
-                        </div>
+                    <div class="info-block">
+                        <span class="info-label">Idade estimada</span>
+                        <span class="pet-info">${pet.idade}</span>
                     </div>
-                    <span class="separator">|</span>
-                    <div style="display: flex; flex-direction: column; align-items: center;">
-                        <span style="font-size: 11px; color: var(--primary); margin-bottom: 2px; font-weight: bold;">Porte estimado</span>
-                        <div class="info-group">
-                            <span class="pet-info">${pet.porte ? pet.porte.charAt(0).toUpperCase() + pet.porte.slice(1).toLowerCase() : ''}</span>
-                        </div>
+                    <div class="info-block">
+                        <span class="info-label">Porte estimado</span>
+                        <span class="pet-info">${pet.porte ? pet.porte.charAt(0).toUpperCase() + pet.porte.slice(1).toLowerCase() : ''}</span>
                     </div>
                 </div>
             </div>
