@@ -174,9 +174,11 @@ function createPetCard(pet) {
             
             <div class="pet-info-container">
                 <div class="info-row">
-                    <div class="info-group">
-                        <i class="fas fa-dna info-icon"></i>
-                        <span class="pet-info">${raca}</span>
+                    <div style="display: flex; flex-direction: column; align-items: center;">
+                        <span style="font-size: 11px; color: var(--primary); margin-bottom: 2px; font-weight: bold;">Características de</span>
+                        <div class="info-group">
+                            <span class="pet-info">${raca}</span>
+                        </div>
                     </div>
                     <span class="separator">|</span>
                     <div class="info-group">
