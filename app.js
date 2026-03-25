@@ -168,7 +168,7 @@ function createPetCard(pet) {
             <div class="pet-header">
                 <div class="pet-name-container" style="display: flex; align-items: center; gap: 8px;">
                     <h3 class="pet-name" style="margin: 0;">${pet.nome}</h3>
-                    <i class="fas ${especieIcon} pet-species-icon" style="font-size: 16px; color: var(--primary);"></i>
+                    <i class="${['fas', pet.especie === 'CÃO' ? 'fa-dog' : 'fa-cat', 'pet-species-icon'].join(' ')}" style="font-size: 16px; color: var(--primary);"></i>
                 </div>
             </div>
             
