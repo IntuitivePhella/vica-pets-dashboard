@@ -181,14 +181,25 @@ function createPetCard(pet) {
                         </div>
                     </div>
                     <span class="separator">|</span>
-                    <div class="info-group">
-                        <i class="fas fa-clock info-icon"></i>
-                        <span class="pet-info">${pet.idade}</span>
+                    <div style="display: flex; flex-direction: column; align-items: center;">
+                        <span style="font-size: 11px; color: var(--primary); margin-bottom: 2px; font-weight: bold;">Sexo</span>
+                        <div class="info-group">
+                            <span class="pet-info">${pet.sexo === 'MACHO' ? 'Macho' : 'Fêmea'}</span>
+                        </div>
                     </div>
                     <span class="separator">|</span>
-                    <div class="info-group">
-                        <i class="fas ${sexoIcon} info-icon"></i>
-                        <span class="pet-info">${pet.sexo === 'MACHO' ? 'Macho' : 'Fêmea'}</span>
+                    <div style="display: flex; flex-direction: column; align-items: center;">
+                        <span style="font-size: 11px; color: var(--primary); margin-bottom: 2px; font-weight: bold;">Idade estimada</span>
+                        <div class="info-group">
+                            <span class="pet-info">${pet.idade}</span>
+                        </div>
+                    </div>
+                    <span class="separator">|</span>
+                    <div style="display: flex; flex-direction: column; align-items: center;">
+                        <span style="font-size: 11px; color: var(--primary); margin-bottom: 2px; font-weight: bold;">Porte estimado</span>
+                        <div class="info-group">
+                            <span class="pet-info">${pet.porte ? pet.porte.charAt(0).toUpperCase() + pet.porte.slice(1).toLowerCase() : ''}</span>
+                        </div>
                     </div>
                 </div>
             </div>
