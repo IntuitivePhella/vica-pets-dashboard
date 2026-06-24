@@ -61,80 +61,6 @@ body {
     overflow-x: hidden;
 }
 
-.wigow-popup-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--spacing-lg);
-    background: rgba(77, 77, 77, 0.32);
-}
-
-.wigow-popup-overlay.is-hidden {
-    display: none;
-}
-
-.wigow-popup-card {
-    position: relative;
-    width: min(92vw, 520px);
-    animation: wigowPopupEnter 0.32s ease-out both;
-}
-
-.wigow-popup-link {
-    display: block;
-    overflow: hidden;
-    line-height: 0;
-    background: var(--white);
-    border: 1px solid rgba(84, 113, 147, 0.45);
-    border-radius: var(--radius-md);
-    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
-}
-
-.wigow-popup-image {
-    display: block;
-    width: 100%;
-    height: auto;
-}
-
-.wigow-popup-close {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    z-index: 1;
-    width: 30px;
-    height: 30px;
-    border: 1px solid rgba(77, 77, 77, 0.12);
-    border-radius: var(--radius-full);
-    background: rgba(255, 255, 255, 0.88);
-    color: var(--text);
-    font-family: 'Nunito', sans-serif;
-    font-size: 16px;
-    font-weight: 800;
-    line-height: 1;
-    cursor: pointer;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
-    transition: background 0.2s ease, transform 0.2s ease;
-}
-
-.wigow-popup-close:hover,
-.wigow-popup-close:focus-visible {
-    background: var(--white);
-    transform: scale(1.04);
-}
-
-@keyframes wigowPopupEnter {
-    from {
-        opacity: 0;
-        transform: translateY(18px) scale(0.96);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
 .container {
     min-height: 100vh;
     display: flex;
@@ -194,48 +120,6 @@ body {
     opacity: 0.7;
     color: var(--text-secondary);
     margin-top: 4px;
-}
-
-.wigow-compact-header {
-    display: block;
-    width: 100%;
-    background: linear-gradient(135deg, #ff5f1f 0%, #f47c20 100%);
-    color: #fff7df;
-    text-decoration: none;
-    box-shadow: 0 3px 14px rgba(0, 0, 0, 0.12);
-}
-
-.wigow-compact-content {
-    max-width: 1400px;
-    min-height: 62px;
-    margin: 0 auto;
-    padding: 10px var(--spacing-lg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--spacing-lg);
-}
-
-.wigow-compact-logo {
-    width: 132px;
-    max-height: 42px;
-    object-fit: contain;
-    display: block;
-}
-
-.wigow-compact-title {
-    color: #fff7df;
-    font-size: 16px;
-    font-weight: 400;
-    line-height: 1.1;
-    letter-spacing: 0.05em;
-    text-align: center;
-}
-
-.wigow-compact-header:hover .wigow-compact-title,
-.wigow-compact-header:focus-visible .wigow-compact-title {
-    text-decoration: underline;
-    text-underline-offset: 4px;
 }
 
 /* Main Content */
@@ -527,22 +411,6 @@ body {
    Responsive Design
    ============================================= */
 @media (max-width: 768px) {
-    .wigow-popup-overlay {
-        padding: var(--spacing-md);
-    }
-
-    .wigow-popup-card {
-        width: min(94vw, 420px);
-    }
-
-    .wigow-popup-close {
-        top: 6px;
-        right: 6px;
-        width: 28px;
-        height: 28px;
-        font-size: 15px;
-    }
-
     /* --- Header mobile --- */
     .header-logo-container {
         flex-direction: column;
@@ -570,23 +438,6 @@ body {
     
     .header-datetime {
         font-size: 12px;
-    }
-
-    .wigow-compact-content {
-        min-height: 56px;
-        padding: 9px var(--spacing-sm);
-        gap: var(--spacing-sm);
-        flex-wrap: wrap;
-    }
-
-    .wigow-compact-logo {
-        width: 104px;
-        max-height: 34px;
-    }
-
-    .wigow-compact-title {
-        font-size: 12px;
-        letter-spacing: 0.04em;
     }
     
     .main-content {
@@ -709,3 +560,5 @@ body {
         transform: scale(1);
     }
 }
+
+
