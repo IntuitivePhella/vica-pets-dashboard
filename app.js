@@ -568,6 +568,19 @@ function updateTabBadges() {
     if (tabAdotado && adotadoCount) tabAdotado.textContent = adotadoCount.textContent;
 }
 
+function setupWigowPopup() {
+    const popup = document.getElementById('wigow-popup');
+    const closeButton = document.getElementById('wigow-popup-close');
+
+    if (!popup || !closeButton) return;
+
+    closeButton.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        popup.classList.add('is-hidden');
+    });
+}
+
 // Inicializar aplicação
 async function init() {
     console.log('Inicializando aplicação...');
@@ -585,6 +598,7 @@ async function init() {
 
 // Iniciar quando a página carregar
 window.addEventListener('DOMContentLoaded', () => {
+    setupWigowPopup();
     init();
 });
 
