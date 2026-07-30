@@ -61,7 +61,11 @@ body {
     overflow-x: hidden;
 }
 
-.wigow-popup-overlay {
+[hidden] {
+    display: none !important;
+}
+
+.partner-popup-overlay {
     position: fixed;
     inset: 0;
     z-index: 1000;
@@ -72,17 +76,13 @@ body {
     background: rgba(77, 77, 77, 0.32);
 }
 
-.wigow-popup-overlay.is-hidden {
-    display: none;
-}
-
-.wigow-popup-card {
+.partner-popup-card {
     position: relative;
     width: min(92vw, 520px);
-    animation: wigowPopupEnter 0.32s ease-out both;
+    animation: partnerPopupEnter 0.32s ease-out both;
 }
 
-.wigow-popup-link {
+.partner-popup-link {
     display: block;
     overflow: hidden;
     line-height: 0;
@@ -92,13 +92,13 @@ body {
     box-shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
 }
 
-.wigow-popup-image {
+.partner-popup-image {
     display: block;
     width: 100%;
     height: auto;
 }
 
-.wigow-popup-close {
+.partner-popup-close {
     position: absolute;
     top: 8px;
     right: 8px;
@@ -118,13 +118,13 @@ body {
     transition: background 0.2s ease, transform 0.2s ease;
 }
 
-.wigow-popup-close:hover,
-.wigow-popup-close:focus-visible {
+.partner-popup-close:hover,
+.partner-popup-close:focus-visible {
     background: var(--white);
     transform: scale(1.04);
 }
 
-@keyframes wigowPopupEnter {
+@keyframes partnerPopupEnter {
     from {
         opacity: 0;
         transform: translateY(18px) scale(0.96);
@@ -196,16 +196,16 @@ body {
     margin-top: 4px;
 }
 
-.wigow-compact-header {
+.partner-compact-header {
     display: block;
     width: 100%;
-    background: linear-gradient(135deg, #ff5f1f 0%, #f47c20 100%);
-    color: #fff7df;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    color: var(--white);
     text-decoration: none;
     box-shadow: 0 3px 14px rgba(0, 0, 0, 0.12);
 }
 
-.wigow-compact-content {
+.partner-compact-content {
     max-width: 1400px;
     min-height: 62px;
     margin: 0 auto;
@@ -216,15 +216,15 @@ body {
     gap: var(--spacing-lg);
 }
 
-.wigow-compact-logo {
+.partner-compact-logo {
     width: 132px;
     max-height: 42px;
     object-fit: contain;
     display: block;
 }
 
-.wigow-compact-title {
-    color: #fff7df;
+.partner-compact-title {
+    color: var(--white);
     font-size: 16px;
     font-weight: 400;
     line-height: 1.1;
@@ -232,8 +232,8 @@ body {
     text-align: center;
 }
 
-.wigow-compact-header:hover .wigow-compact-title,
-.wigow-compact-header:focus-visible .wigow-compact-title {
+.partner-compact-header:hover .partner-compact-title,
+.partner-compact-header:focus-visible .partner-compact-title {
     text-decoration: underline;
     text-underline-offset: 4px;
 }
@@ -527,15 +527,15 @@ body {
    Responsive Design
    ============================================= */
 @media (max-width: 768px) {
-    .wigow-popup-overlay {
+    .partner-popup-overlay {
         padding: var(--spacing-md);
     }
 
-    .wigow-popup-card {
+    .partner-popup-card {
         width: min(94vw, 420px);
     }
 
-    .wigow-popup-close {
+    .partner-popup-close {
         top: 6px;
         right: 6px;
         width: 28px;
@@ -572,19 +572,19 @@ body {
         font-size: 12px;
     }
 
-    .wigow-compact-content {
+    .partner-compact-content {
         min-height: 56px;
         padding: 9px var(--spacing-sm);
         gap: var(--spacing-sm);
         flex-wrap: wrap;
     }
 
-    .wigow-compact-logo {
+    .partner-compact-logo {
         width: 104px;
         max-height: 34px;
     }
 
-    .wigow-compact-title {
+    .partner-compact-title {
         font-size: 12px;
         letter-spacing: 0.04em;
     }
