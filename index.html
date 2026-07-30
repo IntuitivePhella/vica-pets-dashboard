@@ -30,12 +30,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div class="wigow-popup-overlay" id="wigow-popup" role="dialog" aria-modal="true" aria-label="Banner Wigow">
-        <div class="wigow-popup-card">
-            <a class="wigow-popup-link" href="https://wigow.pet/" target="_blank" rel="noopener noreferrer" aria-label="Conhecer a Wigow">
-                <img src="icons/banner_wigow.png" alt="Wigow" class="wigow-popup-image">
+    <div class="partner-popup-overlay" id="partner-popup" role="dialog" aria-modal="true" hidden>
+        <div class="partner-popup-card">
+            <a class="partner-popup-link" id="partner-popup-link" target="_blank" rel="noopener noreferrer">
+                <img id="partner-popup-image" alt="" class="partner-popup-image">
             </a>
-            <button class="wigow-popup-close" id="wigow-popup-close" type="button" aria-label="Fechar banner">x</button>
+            <button class="partner-popup-close" id="partner-popup-close" type="button" aria-label="Fechar publicidade">x</button>
         </div>
     </div>
 
@@ -53,10 +53,10 @@
             </div>
         </header>
 
-        <a class="wigow-compact-header" href="https://wigow.pet/" target="_blank" rel="noopener noreferrer" aria-label="Conhecer suplementos para cachorro da Wigow">
-            <div class="wigow-compact-content">
-                <img src="icons/logo_wigow.png" alt="Wigow" class="wigow-compact-logo" decoding="async">
-                <span class="wigow-compact-title">SUPLEMENTOS PARA CACHORRO</span>
+        <a class="partner-compact-header" id="partner-compact" target="_blank" rel="noopener noreferrer" hidden>
+            <div class="partner-compact-content">
+                <img id="partner-compact-logo" alt="" class="partner-compact-logo" decoding="async">
+                <span class="partner-compact-title" id="partner-compact-title"></span>
             </div>
         </a>
 

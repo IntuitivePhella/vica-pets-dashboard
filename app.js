@@ -1,4 +1,127 @@
 (() => {
+const PARTNER_TIME_ZONE = 'America/Sao_Paulo';
+const PARTNER_WEEKDAY_BY_SHORT_NAME = {
+    Sun: 'domingo',
+    Mon: 'segunda',
+    Tue: 'terca',
+    Wed: 'quarta',
+    Thu: 'quinta',
+    Fri: 'sexta',
+    Sat: 'sabado',
+};
+const PARTNER_DATE_FORMATTER = new Intl.DateTimeFormat('en-US', {
+    timeZone: PARTNER_TIME_ZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    weekday: 'short',
+});
+
+function getSaoPauloDateContext(date = new Date()) {
+    const parts = {};
+    PARTNER_DATE_FORMATTER.formatToParts(date).forEach(({ type, value }) => {
+        parts[type] = value;
+    });
+
+    const dayOfWeek = PARTNER_WEEKDAY_BY_SHORT_NAME[parts.weekday];
+    if (!parts.year || !parts.month || !parts.day || !dayOfWeek) {
+        throw new Error('Não foi possível determinar a data de São Paulo.');
+    }
+
+    return {
+        dateKey: `${parts.year}-${parts.month}-${parts.day}`,
+        dayOfWeek,
+    };
+}
+
+function normalizeHttpUrl(value) {
+    if (typeof value !== 'string') return null;
+
+    try {
+        const url = new URL(value.trim());
+        return url.protocol === 'http:' || url.protocol === 'https:'
+            ? url.toString()
+            : null;
+    } catch (_error) {
+        return null;
+    }
+}
+
+function isLocalHostname(hostname) {
+    return hostname === 'localhost' || hostname === '127.0.0.1';
+}
+
+function getPartnerBrandingElements(root = document) {
+    return {
+        popup: root.getElementById('partner-popup'),
+        popupClose: root.getElementById('partner-popup-close'),
+        popupLink: root.getElementById('partner-popup-link'),
+        popupImage: root.getElementById('partner-popup-image'),
+        compact: root.getElementById('partner-compact'),
+        compactLogo: root.getElementById('partner-compact-logo'),
+        compactTitle: root.getElementById('partner-compact-title'),
+    };
+}
+
+function hidePartnerBranding(root = document) {
+    const { popup, compact } = getPartnerBrandingElements(root);
+    if (popup) popup.hidden = true;
+    if (compact) compact.hidden = true;
+}
+
+function renderPartnerBranding(partner, root = document) {
+    hidePartnerBranding(root);
+    if (!partner) return false;
+
+    const elements = getPartnerBrandingElements(root);
+    if (Object.values(elements).some((element) => !element)) return false;
+
+    const linkLabel = `Conhecer ${partner.name}`;
+    elements.popup.setAttribute('aria-label', `Publicidade de ${partner.name}`);
+    elements.popupLink.href = partner.redirectUrl;
+    elements.popupLink.setAttribute('aria-label', linkLabel);
+    elements.popupImage.src = partner.bannerUrl;
+    elements.popupImage.alt = `Banner da parceria ${partner.name}`;
+
+    elements.compact.href = partner.redirectUrl;
+    elements.compact.setAttribute('aria-label', linkLabel);
+    elements.compactLogo.src = partner.logoUrl;
+    elements.compactLogo.alt = `Logo de ${partner.name}`;
+    elements.compactTitle.textContent = partner.name;
+
+    elements.popup.hidden = false;
+    elements.compact.hidden = false;
+    return true;
+}
+
+function loadInitialDashboardData(brandingLoader, petsLoader) {
+    void Promise.resolve().then(brandingLoader).catch(() => {});
+    return Promise.resolve().then(petsLoader);
+}
+
+function isPartnerBrandingDateCurrent(
+    requestDateKey,
+    activeDateKey,
+    currentDateContext = getSaoPauloDateContext()
+) {
+    return currentDateContext.dateKey === requestDateKey
+        && requestDateKey === activeDateKey;
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        PARTNER_WEEKDAY_BY_SHORT_NAME,
+        getSaoPauloDateContext,
+        normalizeHttpUrl,
+        isLocalHostname,
+        hidePartnerBranding,
+        renderPartnerBranding,
+        loadInitialDashboardData,
+        isPartnerBrandingDateCurrent,
+    };
+    return;
+}
+
 // Configuração do Supabase
 const SUPABASE_URL = 'https://dwrtskjadoocdxojkrlu.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3cnRza2phZG9vY2R4b2prcmx1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM3MDY2OTMsImV4cCI6MjA0OTI4MjY5M30.Ug5Efjr2kSdQyDyJoSKemCsWxRv0i3Ovf6PDOR3YCKE';
@@ -19,6 +142,7 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
 // Estado da aplicação
 let pets = [];
 let realtimeChannel = null;
+let partnerBrandingDateKey = null;
 
 const IMAGE_PLACEHOLDER_URL = 'https://via.placeholder.com/300x200?text=Sem+Foto';
 // Habilitando Netlify Image CDN como Proxy Proxy para mitigar Egress e Limits do Supabase.
@@ -70,6 +194,100 @@ function buildCardImageUrl(originalUrl) {
     
     // Agora encapsula na CDN do Netlify
     return applyImageProxy(cleanUrl);
+}
+
+function buildPartnerImageUrl(originalUrl) {
+    if (!isSupabaseStorageUrl(originalUrl)) return originalUrl;
+    const cleanUrl = stripTransformQueryParams(originalUrl);
+    return isLocalHostname(window.location.hostname)
+        ? cleanUrl
+        : applyImageProxy(cleanUrl);
+}
+
+function normalizePartnerBranding(data) {
+    const name = typeof data?.nome === 'string' ? data.nome.trim() : '';
+    const logoUrl = normalizeHttpUrl(data?.logo_url);
+    const bannerUrl = normalizeHttpUrl(data?.banner_url);
+    const redirectUrl = normalizeHttpUrl(data?.link_redirect);
+
+    if (!name || !logoUrl || !bannerUrl || !redirectUrl) return null;
+
+    return {
+        name,
+        logoUrl: buildPartnerImageUrl(logoUrl),
+        bannerUrl: buildPartnerImageUrl(bannerUrl),
+        redirectUrl,
+    };
+}
+
+function preloadImage(url) {
+    return new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = resolve;
+        image.onerror = reject;
+        image.src = url;
+    });
+}
+
+function warnPartnerBranding() {
+    console.warn('Publicidade indisponível; conteúdo mantido oculto.');
+}
+
+async function loadPartnerBranding(dateContext) {
+    hidePartnerBranding();
+
+    try {
+        const { data, error } = await supabaseClient
+            .from('parcerias_branding')
+            .select('nome, logo_url, banner_url, link_redirect')
+            .eq('ativo', true)
+            .eq('dia_semana', dateContext.dayOfWeek)
+            .lte('data_inicio', dateContext.dateKey)
+            .or(`data_fim.is.null,data_fim.gte.${dateContext.dateKey}`)
+            .maybeSingle();
+
+        if (error) {
+            warnPartnerBranding();
+            return false;
+        }
+
+        if (!data) return false;
+
+        const partner = normalizePartnerBranding(data);
+        if (!partner) {
+            warnPartnerBranding();
+            return false;
+        }
+
+        await Promise.all([
+            preloadImage(partner.logoUrl),
+            preloadImage(partner.bannerUrl),
+        ]);
+
+        if (!isPartnerBrandingDateCurrent(
+            dateContext.dateKey,
+            partnerBrandingDateKey
+        )) return false;
+        return renderPartnerBranding(partner);
+    } catch (_error) {
+        warnPartnerBranding();
+        return false;
+    }
+}
+
+async function refreshPartnerBrandingIfDateChanged() {
+    const dateContext = getSaoPauloDateContext();
+    if (partnerBrandingDateKey === dateContext.dateKey) return false;
+
+    partnerBrandingDateKey = dateContext.dateKey;
+    return loadPartnerBranding(dateContext);
+}
+
+function refreshPartnerBrandingSafely() {
+    refreshPartnerBrandingIfDateChanged().catch(() => {
+        hidePartnerBranding();
+        warnPartnerBranding();
+    });
 }
 
 function getPetPhotos(pet) {
@@ -568,28 +786,35 @@ function updateTabBadges() {
     if (tabAdotado && adotadoCount) tabAdotado.textContent = adotadoCount.textContent;
 }
 
-function setupWigowPopup() {
-    const popup = document.getElementById('wigow-popup');
-    const closeButton = document.getElementById('wigow-popup-close');
+function setupPartnerPopup() {
+    const popup = document.getElementById('partner-popup');
+    const closeButton = document.getElementById('partner-popup-close');
 
     if (!popup || !closeButton) return;
 
     closeButton.addEventListener('click', (event) => {
         event.preventDefault();
         event.stopPropagation();
-        popup.classList.add('is-hidden');
+        popup.hidden = true;
     });
 }
 
 // Inicializar aplicação
 async function init() {
     console.log('Inicializando aplicação...');
-    await loadPets();
+    await loadInitialDashboardData(
+        refreshPartnerBrandingSafely,
+        loadPets
+    );
+
     setupRealtimeSubscription();
     
     // Atualizar data/hora atual e configurar atualização a cada minuto
     updateDateTime();
-    setInterval(updateDateTime, 60 * 1000);
+    setInterval(() => {
+        updateDateTime();
+        refreshPartnerBrandingSafely();
+    }, 60 * 1000);
     
     // Setup mobile UX (tabs + swipe sincronizados)
     setupMobileTabs();
@@ -598,7 +823,12 @@ async function init() {
 
 // Iniciar quando a página carregar
 window.addEventListener('DOMContentLoaded', () => {
-    setupWigowPopup();
+    setupPartnerPopup();
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            refreshPartnerBrandingSafely();
+        }
+    });
     init();
 });
 
