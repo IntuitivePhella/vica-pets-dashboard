@@ -30,6 +30,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+    <div class="partner-popup-overlay" id="partner-popup" role="dialog" aria-modal="true" hidden>
+        <div class="partner-popup-card">
+            <a class="partner-popup-link" id="partner-popup-link" target="_blank" rel="noopener noreferrer">
+                <img id="partner-popup-image" alt="" class="partner-popup-image">
+            </a>
+            <button class="partner-popup-close" id="partner-popup-close" type="button" aria-label="Fechar publicidade">x</button>
+        </div>
+    </div>
+
     <div class="container">
         <header class="header">
             <div class="header-content">
@@ -43,6 +52,13 @@
                 </div>
             </div>
         </header>
+
+        <a class="partner-compact-header" id="partner-compact" target="_blank" rel="noopener noreferrer" hidden>
+            <div class="partner-compact-content">
+                <img id="partner-compact-logo" alt="" class="partner-compact-logo" decoding="async">
+                <span class="partner-compact-title" id="partner-compact-title"></span>
+            </div>
+        </a>
 
         <!-- Mobile: Barra de Abas + Navegação por Swipe (apenas visível no mobile) -->
         <div class="mobile-tabs" id="mobile-tabs">
@@ -116,4 +132,3 @@
     </script>
 </body>
 </html>
-

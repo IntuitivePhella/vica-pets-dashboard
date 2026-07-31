@@ -156,9 +156,8 @@ try {
     
     // Copiar pasta icons
     const iconsDir = path.join(distDir, 'icons');
-    if (!fs.existsSync(iconsDir)) {
-        fs.mkdirSync(iconsDir);
-    }
+    fs.rmSync(iconsDir, { recursive: true, force: true });
+    fs.mkdirSync(iconsDir);
     
     const iconsFiles = fs.readdirSync('icons');
     iconsFiles.forEach(file => {
@@ -174,4 +173,3 @@ try {
     console.error('❌ Erro durante o build:', error);
     process.exit(1);
 }
-
